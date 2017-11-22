@@ -1,8 +1,14 @@
 package com.richeditor.wangweijun1.richeditortest;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -10,7 +16,7 @@ import jp.wasabeef.richeditor.RichEditor;
 
 public class MainActivity extends AppCompatActivity {
     private RichEditor mEditor;
-    private TextView mPreview;
+    private TextView mPreview, mResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,10 +35,13 @@ public class MainActivity extends AppCompatActivity {
         //mEditor.setInputEnabled(false);
 
         mPreview = (TextView) findViewById(R.id.preview);
+        mResult = (TextView) findViewById(R.id.result);
+
         mEditor.setOnTextChangeListener(new RichEditor.OnTextChangeListener() {
             @Override
             public void onTextChange(String text) {
                 mPreview.setText(text);
+                mResult.setText(Html.fromHtml(text));
             }
         });
 
@@ -213,8 +222,9 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.action_insert_image).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mEditor.insertImage("http://www.1honeywan.com/dachshund/image/7.21/7.21_3_thumb.JPG",
-                        "dachshund");
+//                mEditor.insertImage("http://www.1honeywan.com/dachshund/image/7.21/7.21_3_thumb.JPG",
+//                        "dachshund");
+                choseHeadImageFromPicture();
             }
         });
 
@@ -231,4 +241,67 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private static final int CODE_GALLLERY_REQUEST = 0xa0;//本地
+    private void choseHeadImageFromPicture() {
+        Intent intentFromGallery = new Intent();
+        intentFromGallery.setType("image/*");
+        intentFromGallery.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intentFromGallery, CODE_GALLLERY_REQUEST);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+        switch (requestCode) {
+            case CODE_GALLLERY_REQUEST://选好图片就立马上传，产生图片url插入富文本
+                Uri uri = data.getData();
+                Log.i("wang", "uri.toString()");
+//                mEditor.insertImage(uri.toString(), "dachshund");
+                cropRawPhoto(data.getData());//直接裁剪图片
+                break;
+            case CODE_RESULT_REQUEST:
+                if (imageUri != null) {
+                    // 上传icon
+//                    toUploadFile(new File(imageUri.getPath()),
+//                            UserController.getInstance().getUserInfoModel().id,
+//                            UserController.getInstance().getToken());
+                }
+                break;
+        }
+
+    }
+
+    /**
+     * 裁剪头像大小
+     *
+     * @param uri
+     */
+
+    private static int output_x = 360;
+    private static int output_y = 360;
+    private static final int CODE_RESULT_REQUEST = 0xa2;//裁剪后结果
+    private static final String IMAGE_FILE_HEADNAME = "file:///sdcard/fuwenbenimage.jpg";
+    Uri imageUri = Uri.parse(IMAGE_FILE_HEADNAME);
+
+
+    private void cropRawPhoto(Uri uri) {
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(uri, "image/*");
+
+        intent.putExtra("crop", "true");
+        intent.putExtra("aspectX", 1);
+        intent.putExtra("aspectY", 1);
+        intent.putExtra("outputX", output_x);
+        intent.putExtra("outputY", output_y);
+        intent.putExtra("return-data", false);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString());
+        intent.putExtra("noFaceDetection", true);
+
+        startActivityForResult(intent, CODE_RESULT_REQUEST);
+    }
+
 }
