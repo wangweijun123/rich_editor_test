@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -15,8 +14,8 @@ import android.widget.TextView;
 import jp.wasabeef.richeditor.RichEditor;
 
 public class MainActivity extends AppCompatActivity {
-    private RichEditor mEditor;
-    private TextView mPreview, mResult;
+    private RichEditor mEditor, editor2;
+    private TextView mPreview;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +34,26 @@ public class MainActivity extends AppCompatActivity {
         //mEditor.setInputEnabled(false);
 
         mPreview = (TextView) findViewById(R.id.preview);
-        mResult = (TextView) findViewById(R.id.result);
+        editor2 = (RichEditor) findViewById(R.id.editor2);
+        editor2.setEditorHeight(200);
+        editor2.setEditorFontSize(22);
+        editor2.setEditorFontColor(Color.RED);
+        editor2.setInputEnabled(false);
+        //mEditor.setEditorBackgroundColor(Color.BLUE);
+        //mEditor.setBackgroundColor(Color.BLUE);
+        //mEditor.setBackgroundResource(R.drawable.bg);
+        editor2.setPadding(10, 10, 10, 10);
+
+
 
         mEditor.setOnTextChangeListener(new RichEditor.OnTextChangeListener() {
             @Override
             public void onTextChange(String text) {
                 mPreview.setText(text);
-                mResult.setText(Html.fromHtml(text));
+//                mResult.setText(Html.fromHtml(text));
+//                setTextViewResult(text);
+
+                editor2.setHtml(text);
             }
         });
 
@@ -303,5 +315,7 @@ public class MainActivity extends AppCompatActivity {
 
         startActivityForResult(intent, CODE_RESULT_REQUEST);
     }
+
+
 
 }
