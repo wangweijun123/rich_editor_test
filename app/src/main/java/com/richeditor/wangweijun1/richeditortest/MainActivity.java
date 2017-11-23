@@ -252,6 +252,13 @@ public class MainActivity extends AppCompatActivity {
                 mEditor.insertTodo();
             }
         });
+        findViewById(R.id.action_jump).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(), AdapterInputMethodLayoutActivity.class));
+            }
+        });
+
     }
 
     private static final int CODE_GALLLERY_REQUEST = 0xa0;//本地
